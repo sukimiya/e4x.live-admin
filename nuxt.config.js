@@ -26,7 +26,8 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
-    '@/plugins/antd-ui'
+    '@/plugins/antd-ui',
+    '@/plugins/video'
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -42,5 +43,14 @@ export default {
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
+    extend(config, {isDev, isClient}) {
+      config.module.rules.push({
+        test: /\.swf$/,
+        loader: "url-loader",
+        options:{
+          limit: 10000
+        }
+      });
+    }
   }
 }

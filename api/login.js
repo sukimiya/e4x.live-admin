@@ -8,9 +8,9 @@ export const logout = () => postApi(`${baseURL}auth/logout`)
 
 export const getAllDevices = () => getApi(`${baseURL}up/getAllDevice`)
 
-export const requestMv = (data) => getApi(`${baseURL}up/requiremv`, data)
+export const requestMv = (data) => postApi(`${baseURL}up/requiremv`, data)
 
-export const downloadMv = ({ id, file }) => requestDownload(`${baseURL}/up/upstore/${id}/${file}`)
+export const downloadMv = ({ id, file }) => requestDownload('post', `${baseURL}/up/upstore/${id}/${file}`, null, null, file)
 
 export default {
     login,

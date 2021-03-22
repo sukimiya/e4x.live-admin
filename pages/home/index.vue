@@ -6,13 +6,7 @@
           <img src="images/logo.png" style="width: 60px; height: 60px" />
         </a-col>
         <a-col :span="2">
-          <a-button ghost
-            type="primary"
-            style="margin-bottom: 16px;margin-left:16px;"
-            @click="toggleCollapsed"
-          >
-            <a-icon :type="collapsed ? 'menu-unfold' : 'menu-fold'" />
-          </a-button>
+          
         </a-col>
         <a-col :span="19">
           <a-row type="flex" justify="end">
@@ -22,7 +16,7 @@
                 icon="user"
                 align="right"
               />
-              <span style="color: #cccccc;margin-left: 16px;">admin</span>
+              <span style="color: #cccccc; margin-left: 16px">admin</span>
             </a-col>
           </a-row>
         </a-col>
@@ -30,68 +24,127 @@
       <div></div>
     </a-layout-header>
     <a-layout>
-      <a-layout-sider>
-        <div>
-          <a-menu
-            :default-selected-keys="['1']"
-            :default-open-keys="['sub1']"
-            mode="inline"
-            theme="dark"
-            :inline-collapsed="collapsed"
-          >
-            <a-menu-item key="1">
-              <a-icon type="pie-chart" />
-              <span>Option 1</span>
-            </a-menu-item>
-            <a-menu-item key="2">
-              <a-icon type="desktop" />
-              <span>Option 2</span>
-            </a-menu-item>
-            <a-menu-item key="3">
-              <a-icon type="inbox" />
-              <span>Option 3</span>
-            </a-menu-item>
-            <a-sub-menu key="sub1">
-              <span slot="title"
-                ><a-icon type="mail" /><span>Navigation One</span></span
-              >
-              <a-menu-item key="5"> Option 5 </a-menu-item>
-              <a-menu-item key="6"> Option 6 </a-menu-item>
-              <a-menu-item key="7"> Option 7 </a-menu-item>
-              <a-menu-item key="8"> Option 8 </a-menu-item>
-            </a-sub-menu>
-            <a-sub-menu key="sub2">
-              <span slot="title"
-                ><a-icon type="appstore" /><span>Navigation Two</span></span
-              >
-              <a-menu-item key="9"> Option 9 </a-menu-item>
-              <a-menu-item key="10"> Option 10 </a-menu-item>
-              <a-sub-menu key="sub3" title="Submenu">
-                <a-menu-item key="11"> Option 11 </a-menu-item>
-                <a-menu-item key="12"> Option 12 </a-menu-item>
-              </a-sub-menu>
-            </a-sub-menu>
-          </a-menu>
-        </div>
-      </a-layout-sider>
-      <a-layout-content>Content</a-layout-content>
+      <a-layout-content>
+        <a-row type="flex" justify="start">
+          <a-col>
+            <a-page-header
+              style="border: 0px solid rgb(235, 237, 240)"
+              title="Home"
+              sub-title="Devices List"
+              @back="() => $router.go(-1)"
+            />
+          </a-col>
+        </a-row>
+        <a-row type="flex" justify="start">
+          <a-col :span="24">
+            <DevicesList
+              :listData="devicesListData"
+              @onPlayVideo="onPlayVideoHandler"
+              @onSelectDevice="onSelectDeviceHandler"
+            />
+          </a-col>
+        </a-row>
+        <a-modal
+          :top="0"
+          v-model="isHistoryOpen"
+          :afterClose="onModelClose"
+          :title="modelTitle"
+          :closable="true"
+          style="border: 0px solid rgb(235, 237, 240)"
+        >
+          <MovieList :deviceID="openDeviceID" :listData="moviesData" />
+        </a-modal>
+        <a-modal
+          v-model="isVideoPlayOpen"
+          :title="playerTitle"
+          :closable="true"
+          :width="700"
+        >
+          <VideoPlayer :playerOptions="videoOptions" />
+        </a-modal>
+      </a-layout-content>
     </a-layout>
     <a-layout-footer>Footer</a-layout-footer>
   </a-layout>
 </template>
 
 <script>
+import { getAllDevices } from "~~/api/login";
+import DevicesList from "~~/components/deviceslist/index.vue";
+import MovieList from "~~/components/movieslist/index.vue";
+import VideoPlayer from "~~/components/videoplayer.vue";
 export default {
   transition: "page",
   data() {
     return {
       collapsed: false,
+      isHistoryOpen: false,
+      isVideoPlayOpen: false,
+      modelTitle: "",
+      playerTitle: "",
+      openDeviceID: null,
+      devicesListData: [],
+      moviesData: [],
+      videoOptions: {},
+      videoSource: "",
+      defaultVideoOption: {
+        height: "360",
+        autoplay: true,
+        muted: false,
+        language: "zh-CN",
+        playbackRates: [0.7, 1.0, 1.5, 2.0],
+        poster: "",
+      },
     };
   },
+  created() {
+    const self = this;
+    getAllDevices().then((res) => {
+      console.log("getAllDevices:", res);
+      if (res && res.length > 0) {
+        var i = 0;
+        self.devicesListData = res;
+      }
+    });
+  },
+  components: { DevicesList, MovieList, VideoPlayer },
   methods: {
     toggleCollapsed() {
       this.collapsed = !this.collapsed;
     },
+    onModelClose() {
+      this.modelTitle = "";
+      this.moviesData = [];
+    },
+    onPlayVideoHandler(record) {
+      console.log("onPlayVideoHandler", record, this.$refs.vp);
+      this.isVideoPlayOpen = true;
+      this.playerTitle =
+        "直播设备 " + record.carNumber ? record.carNumber : ecord.deviceID;
+      this.videoSource = record.upStreamUrl;
+      var playUrl = record.upStreamUrl + "/playlist.m3u8"
+      playUrl = playUrl.replace(":1935/", ":8080/").replace("rtmp://", "http://")
+      this.videoOptions = {
+        ...this.defaultVideoOption,
+        sources: [
+          {
+            withCredentials: false,
+            type: "application/x-mpegURL",
+            src: playUrl,
+          },
+        ],
+      };
+    },
+    onSelectDeviceHandler(record) {
+      console.debug("onSelectDeviceHandler", record);
+      this.openDeviceID = record.deviceID;
+      this.modelTitle =
+        "" + record.carNumber ? record.carNumber : ecord.deviceID + "的历史";
+      this.moviesData = record.records;
+      this.isHistoryOpen = true;
+    },
   },
 };
 </script>
+<style scoped>
+</style>
