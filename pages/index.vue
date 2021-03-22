@@ -112,6 +112,7 @@ export default {
       return isFieldTouched('password') && getFieldError('password');
     },
     handleSubmit(e) {
+      const self = this
       e.preventDefault();
       this.form.validateFields((err, values) => {
         if (!err) {
@@ -119,7 +120,10 @@ export default {
         }
         console.log('validateFields:' + JSON.stringify(values))
         login({ username: values.userName, pwd: values.password }).then((res) => {
-          console.log(res)
+          console.log(res, self)
+          self.$message.info('redirect to home', 5).then((t) => {
+            self.$router.push('/home')
+          });
         }).catch((err) => {
           console.error(err)
         })
