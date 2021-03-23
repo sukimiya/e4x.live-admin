@@ -123,7 +123,7 @@ export default {
         "直播设备 " + record.carNumber ? record.carNumber : ecord.deviceID;
       this.videoSource = record.upStreamUrl;
       var playUrl = record.upStreamUrl + "/playlist.m3u8"
-      playUrl = playUrl.replace(":1935/", ":8080/").replace("rtmp://", "http://")
+      playUrl = playUrl.replace(":1935/", ":5088/").replace("rtmp://", "http://")
       this.videoOptions = {
         ...this.defaultVideoOption,
         sources: [

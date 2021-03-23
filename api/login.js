@@ -1,6 +1,7 @@
 import { getApi, postApi, requestDownload } from '~~/libs/api.request'
 
-export const baseURL = 'http://e2x.cn:5089/'
+export const baseURL = 'http://e4x.live:5089/'
+// export const baseURL = 'http://e2x.cn:5089/'
 
 export const login = (data) => postApi(`${baseURL}auth/login`, data)
 
