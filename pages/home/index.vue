@@ -41,6 +41,7 @@
               :listData="devicesListData"
               @onPlayVideo="onPlayVideoHandler"
               @onSelectDevice="onSelectDeviceHandler"
+              @onEditDevice="onEditDeviceHandler"
             />
           </a-col>
         </a-row>
@@ -62,6 +63,23 @@
         >
           <VideoPlayer :playerOptions="videoOptions" />
         </a-modal>
+        <a-modal
+          v-model="editOpen"
+          :title="editeTitle"
+          @ok="handleEditOk"
+          :closable="true">
+          <a-form >
+            <a-form-item>
+              <a-input v-model="currentEditDevice.carNumber"
+                v-decorator="[
+                  '车牌号',
+                  { rules: [{ required: true, message: '请输入车牌号' }] },
+                ]"
+                placeholder="请输入车牌号"
+              />
+            </a-form-item>
+          </a-form>
+        </a-modal>
       </a-layout-content>
     </a-layout>
     <a-layout-footer>Footer</a-layout-footer>
@@ -80,13 +98,19 @@ export default {
       collapsed: false,
       isHistoryOpen: false,
       isVideoPlayOpen: false,
+      editOpen: false,
       modelTitle: "",
       playerTitle: "",
+      editeTitle: "",
       openDeviceID: null,
       devicesListData: [],
       moviesData: [],
       videoOptions: {},
       videoSource: "",
+      currentEditDevice: {
+        deviceID: null,
+        carNumber: null
+      },
       defaultVideoOption: {
         height: "360",
         autoplay: true,
@@ -143,6 +167,14 @@ export default {
       this.moviesData = record.records;
       this.isHistoryOpen = true;
     },
+    onEditDeviceHandler(record) {
+      this.currentEditDevice = record
+      this.editOpen = true
+      this.editeTitle = '修改设备' + record.deviceID
+    },
+    handleEditOk() {
+      this.editOpen = false
+    }
   },
 };
 </script>

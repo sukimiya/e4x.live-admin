@@ -50,6 +50,7 @@ export default {
     },
     editCarNumber(record) {
       console.log("change car number:" + record.deviceID + "");
+      this.$emit("onEditDevice", record)
     },
     previewMv(record) {
       console.log("preview car mv list:" + record.deviceID + "");

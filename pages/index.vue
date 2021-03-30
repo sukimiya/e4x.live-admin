@@ -4,22 +4,6 @@
       <Logo />
       <h1 class="title">e4x-live-admin</h1>
       <div class="links">
-        <a
-          href="https://nuxtjs.org/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--green"
-        >
-          Documentation
-        </a>
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--grey"
-        >
-          GitHub
-        </a>
         <a-form layout="inline" :form="form" @submit="handleSubmit">
           <a-form-item
             :validate-status="userNameError() ? 'error' : ''"
@@ -121,7 +105,7 @@ export default {
         console.log('validateFields:' + JSON.stringify(values))
         login({ username: values.userName, pwd: values.password }).then((res) => {
           console.log(res, self)
-          self.$message.info('redirect to home', 5).then((t) => {
+          self.$message.info('redirect to home', 1).then((t) => {
             self.$router.push('/home')
           });
         }).catch((err) => {
