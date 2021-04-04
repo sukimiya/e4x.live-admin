@@ -35,9 +35,14 @@
             />
           </a-col>
         </a-row>
+        <a-row type="flex" justify="end" style="margin-right: 32px;">
+          <a-button @click="handleRefreshList" icon="sync"/>
+        </a-row>
         <a-row type="flex" justify="start">
           <a-col :span="24">
             <DevicesList
+              v-if="renderComponent"
+              :refKey="timeScope"
               :listData="devicesListData"
               @onPlayVideo="onPlayVideoHandler"
               @onSelectDevice="onSelectDeviceHandler"
@@ -87,7 +92,7 @@
 </template>
 
 <script>
-import { getAllDevices } from "~~/api/login";
+import { getAllDevices, editDevice } from "~~/api/login";
 import DevicesList from "~~/components/deviceslist/index.vue";
 import MovieList from "~~/components/movieslist/index.vue";
 import VideoPlayer from "~~/components/videoplayer.vue";
@@ -95,6 +100,8 @@ export default {
   transition: "page",
   data() {
     return {
+      refreshInterval: 0,
+      timeScope: 0,
       collapsed: false,
       isHistoryOpen: false,
       isVideoPlayOpen: false,
@@ -119,17 +126,11 @@ export default {
         playbackRates: [0.7, 1.0, 1.5, 2.0],
         poster: "",
       },
+      renderComponent: true
     };
   },
   created() {
-    const self = this;
-    getAllDevices().then((res) => {
-      console.log("getAllDevices:", res);
-      if (res && res.length > 0) {
-        var i = 0;
-        self.devicesListData = res;
-      }
-    });
+    this.handleRefreshList()
   },
   components: { DevicesList, MovieList, VideoPlayer },
   methods: {
@@ -173,7 +174,79 @@ export default {
       this.editeTitle = '修改设备' + record.deviceID
     },
     handleEditOk() {
+      var self = this
+      var record = this.currentEditDevice
+      editDevice({deviceId: record.deviceID, carNumber: record.carNumber}).then((res) => {
+        console.log('editDevice:' + res)
+      })
       this.editOpen = false
+    },
+    startRefresh() {
+      var self = this
+      clearInterval(self.refreshInterval)
+      self.refreshInterval = setInterval((it)=>{
+        console.info("home refresh")
+        it.devicesListData.forEach((item) => {
+          if (item.lastTime && item.lastTime != 0) {
+            item.playingTime = it.getTimeFormat(item)
+          } else {
+            item.playingTime = "未连接"
+          }
+        })
+        self.timeScope = new Date().getTime()
+        it.forceRerender()
+      },3000, self)
+    },
+    getTimeFormat(item) {
+      var cur = new Date().getTime()
+      var time = (cur - item.lastTime) / 1000
+      var ss = parseInt(time % 60)
+      var mm = parseInt((time / 60) % 60)
+      var hh = parseInt(mm /60)
+      if(time < 60) {
+        return this.getDG(ss)
+      } else if (time < 3600) {
+        return this.getDG(mm) + ":" + this.getDG(ss)
+      } else if (time < 43200) {
+        return this.getDG(hh) + ":" + this.getDG(mm) + ":" + this.getDG(ss)
+      } else {
+        var dd = parseInt(time / 43200)
+        return dd+ "天 " +this.getDG(hh) + ":" + this.getDG(mm) + ":" + this.getDG(ss)
+      }
+    },
+    getDG(num) {
+      if (String(num).length == 1) {
+        return "0" + num
+      } else if (String(num).length == 2) {
+        return num + ""
+      }
+      return "00"
+    },
+    forceRerender() {
+      // 从 DOM 中删除 my-component 组件
+      this.renderComponent = false;
+      this.$nextTick(() => {
+      // 在 DOM 中添加 my-component 组件
+      this.renderComponent = true;
+      });
+    },
+    handleRefreshList() {
+      var self = this
+      getAllDevices().then((res) => {
+        console.log("getAllDevices:", res);
+        if (res && res.length > 0) {
+          var i = 0;
+          self.devicesListData = res;
+          res.forEach(element => {
+            if (element.lastTime && element.lastTime != 0) {
+              element.playingTime = self.getTimeFormat(element)
+            } else {
+              element.playingTime = "未连接"
+            }
+          });
+        }
+      });
+      self.startRefresh()
     }
   },
 };

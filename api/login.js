@@ -11,6 +11,8 @@ export const getAllDevices = () => getApi(`${baseURL}up/getAllDevice`)
 
 export const requestMv = (data) => postApi(`${baseURL}up/requiremv`, data)
 
+export const editDevice = (data) => postApi(`${baseURL}up/editDevice`, data)
+
 export const downloadMv = ({ id, file }) => requestDownload('post', `${baseURL}/up/upstore/${id}/${file}`, null, null, file)
 
 export default {

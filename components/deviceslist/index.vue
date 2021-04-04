@@ -1,7 +1,7 @@
 <template>
   <a-row style="padding: 32px; width: 100%; height: 100%">
     <a-col>
-      <a-table :columns="columns" :data-source="$props.listData">
+      <a-table :columns="columns" :data-source="$props.listData" rowKey="deviceID">
         <span slot="carNumber"
           ><a-tag color="blue" slot-scope="text">{{ text }}</a-tag></span
         >
@@ -19,7 +19,7 @@
 
 <script>
 export default {
-  props: ["listData"],
+  props: ["listData", "refKey"],
   data() {
     return {
       columns: [
@@ -34,10 +34,15 @@ export default {
           title: "车牌号",
         },
         {
+          dataIndex: "playingTime",
+          title: "在线时间",
+          key: "playingTime"
+        },
+        {
           title: "操作",
           key: "action",
           scopedSlots: { customRender: "action" },
-        },
+        }
       ],
     };
   },
@@ -59,7 +64,7 @@ export default {
     history(record) {
       console.log("show history:" + record.deviceID + "");
       this.$emit("onSelectDevice", record)
-    },
+    }
   },
 };
 </script>

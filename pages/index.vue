@@ -4,7 +4,7 @@
       <Logo />
       <h1 class="title">e4x-live-admin</h1>
       <div class="links">
-        <a-form layout="inline" :form="form" @submit="handleSubmit">
+        <!-- <a-form layout="inline" :form="form" @submit="handleSubmit">
           <a-form-item
             :validate-status="userNameError() ? 'error' : ''"
             :help="userNameError() || ''"
@@ -59,14 +59,14 @@
               Log in
             </a-button>
           </a-form-item>
-        </a-form>
+        </a-form> -->
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { login } from "~~/api/login";
+// import { login } from "~~/api/login";
 
 function hasErrors(fieldsError) {
   return Object.keys(fieldsError).some(field => fieldsError[field]);
@@ -83,6 +83,10 @@ export default {
       // To disabled submit button at the beginning.
       this.form.validateFields();
     });
+    var self = this
+    // self.$message.info('redirect to home', 1).then((t) => {
+      self.$router.push('/home')
+    // });
   },
   methods: {
     // Only show error after a field is touched.
